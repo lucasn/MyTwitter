@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+    <h1>Timeline</h1>
+    <a href="/logout">sair</a>
+    <a href="/tweetar">Escrever Nova Mensagem</a>
+    <a th:href="@{/perfil(usuario=${usuario.usuario})}">Meu Perfil</a>
+    <a href="/buscarusuario">Buscar Usuário</a>
+    <p th:text="${usuario.usuario}"></p>
+    <div th:each="tweet : ${timeline}">
+        <hr>
+        <p th:text="${tweet.usuario}"></p>
+        <p th:text="${tweet.mensagem}"></p>
+        <hr>
+    </div>
+
+</body>
+</html>

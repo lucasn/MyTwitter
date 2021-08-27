@@ -6,6 +6,7 @@ import com.lucasnoronha.mytwitter.usuario.Perfil;
 import com.lucasnoronha.mytwitter.usuario.Tweet;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -65,7 +66,12 @@ public class MyTwitter implements ITwitter{
         else if (!tmpUsuario.isAtivo())
             throw new PDException(usuario);
 
-        return tmpUsuario.getTimeline();
+        List<Tweet> timeline = tmpUsuario.getTimeline();
+        List<Tweet> correctOrderTimeline = new Vector<>();
+        for (int i = timeline.size() - 1; i >= 0; i--){
+            correctOrderTimeline.add(timeline.get(i));
+        }
+        return correctOrderTimeline;
     }
 
     @Override
@@ -77,7 +83,12 @@ public class MyTwitter implements ITwitter{
         else if (!tmpUsuario.isAtivo())
             throw new PDException(usuario);
 
-        return tmpUsuario.getTimeline().stream().filter(tweet -> tweet.getUsuario().equals(usuario)).collect(Collectors.toCollection(Vector::new));
+        List<Tweet> tweets = tmpUsuario.getTimeline().stream().filter(tweet -> tweet.getUsuario().equals(usuario)).collect(Collectors.toCollection(Vector::new));
+        List<Tweet> correctOrderTweets = new Vector<>();
+        for (int i = tweets.size() - 1; i >= 0; i--){
+            correctOrderTweets.add(tweets.get(i));
+        }
+        return correctOrderTweets;
     }
 
     @Override
@@ -113,6 +124,18 @@ public class MyTwitter implements ITwitter{
     }
 
     @Override
+    public int numeroSeguidos(String usuario) throws PIException, PDException{
+        Perfil tmpUsuario = repositorio.buscar(usuario);
+
+        if (tmpUsuario == null)
+            throw new PIException(usuario);
+        else if (!tmpUsuario.isAtivo())
+            throw new PDException(usuario);
+
+        return tmpUsuario.getSeguidos().size();
+    }
+
+    @Override
     public List<Perfil> seguidores(String usuario) throws PIException, PDException{
         Perfil tmpUsuario = repositorio.buscar(usuario);
 
@@ -134,6 +157,18 @@ public class MyTwitter implements ITwitter{
             throw new PDException(usuario);
 
         return tmpUsuario.getSeguidos();
+    }
+
+    @Override
+    public boolean estaSeguindo(String seguidor, String seguido) throws PIException, PDException, SIException{
+        if (seguido.equals(seguidor)){
+            return false;
+        }
+        List<Perfil> seguidos = seguidos(seguidor);
+        for (Perfil s : seguidos){
+            if (s.getUsuario().equals(seguido)) return true;
+        }
+        return false;
     }
 
 }

@@ -16,6 +16,8 @@ public interface ITwitter {
     List<Tweet> tweets(String usuario) throws PIException, PDException;
     void seguir(String seguidor, String seguido) throws PIException, PDException, SIException;
     int numeroSeguidores(String usuario) throws PIException, PDException;
+    int numeroSeguidos(String usuario) throws PIException, PDException;
     List<Perfil> seguidores(String usuario) throws PIException, PDException;
     List<Perfil> seguidos(String usuario) throws PIException, PDException;
+    boolean estaSeguindo(String seguidor, String seguido) throws PIException, PDException, SIException;
 }

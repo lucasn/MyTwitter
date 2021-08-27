@@ -11,7 +11,10 @@
 
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand mb-0 h1" href="/">MyTwitter</a>
+            <a class="navbar-brand mb-0 h1" href="/">
+                <img th:src="@{/img/bird.svg}" alt="" class="d-inline-block align-text-top" width="40" height=30>
+                MyTwitter
+            </a>
             <div class="d-flex justify-content-end">
                 <div class="px-2">
                     <a class="btn btn-primary" href="/login">Login</a>
@@ -22,10 +25,17 @@
         </div>
     </nav>
 
-    <div clas="d-flex justify-content-end">
-        <div></div>
-        <div><img src="../static/img/Bird.svg" alt="bird" width="500px" height="500px"></div>
+    <div class="row align-items-center w-100 mt-5">
+        <div class="col-5">
+            <h1 class="text-md-end text-sm-center">Bem-vindo ao MyTwitter</h1>
+        </div>
+        <div class="col">
+            <div class="d-flex justify-content-center">
+                <img class="w-75" th:src="@{/img/bird.svg}" alt="">
+            </div>
+        </div>
     </div>
+
 <!--    <div class="container">-->
 <!--        <h1>My Twitter</h1>-->
 <!--        <a class="btn btn-primary" href="/login">Login</a>-->

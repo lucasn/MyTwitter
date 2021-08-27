@@ -10,7 +10,10 @@
 
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand mb-0 h1" href="/">MyTwitter</a>
+            <a class="navbar-brand mb-0 h1" href="/">
+                <img th:src="@{/img/bird.svg}" alt="" class="d-inline-block align-text-top" width="40" height=30>
+                MyTwitter
+            </a>
             <div class="d-flex justify-content-end">
                 <div class="px-2">
                     <a class="btn btn-primary" href="/login">Login</a>
@@ -21,7 +24,7 @@
         </div>
     </nav>
 
-    <div class="container mt-10 text-center mt-5">
+    <div class="container text-center mt-5">
         <h1>Cadastrar Novo Usuário</h1>
     </div>
 
@@ -29,10 +32,10 @@
         <form action="/cadastrar" method="post">
             <fieldset>
                 <label class="form-label">Nome</label>
-                <input class="form-control mb-3" type="text" name="nome">
+                <input class="form-control mb-3" type="text" name="nome" required="true">
 
                 <Label>CPF/CNPJ</Label>
-                <input class="form-control mb-3" type="text" name="identificador">
+                <input class="form-control mb-3" type="text" name="identificador" required="true">
             </fieldset>
 
             <fieldset>

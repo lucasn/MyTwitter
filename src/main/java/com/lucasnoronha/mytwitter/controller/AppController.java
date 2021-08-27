@@ -10,7 +10,6 @@ import com.lucasnoronha.mytwitter.usuario.Tweet;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -26,6 +25,21 @@ public class AppController {
     public AppController(ITwitter application, IRepositorioUsuario repositorio){
         this.application = application;
         this.repositorio = repositorio;
+        //TODO: remover testes
+        PessoaFisica p1 = new PessoaFisica("lucas");
+        p1.setCpf(123L);
+        try {
+            this.application.criarPerfil(p1);
+        } catch (PEException e){
+
+        }
+        PessoaFisica p2 = new PessoaFisica("cleber");
+        p2.setCpf(123L);
+        try {
+            this.application.criarPerfil(p2);
+        } catch (PEException e){
+
+        }
     }
 
     @GetMapping("/")
@@ -37,10 +51,13 @@ public class AppController {
             try {
                 List<Tweet> timeline = application.timeline(usuarioAtual.getUsuario());
                 model.addAttribute("timeline", timeline);
+                model.addAttribute("quanttweets", timeline.size());
             } catch (PIException e){
-                //TODO: tratar Exceção
+                model.addAttribute("erro", e.getMessage());
+                return "error";
             } catch (PDException e){
-                //TODO: tratar Exceção
+                model.addAttribute("erro", e.getMessage());
+                return "error";
             }
             model.addAttribute("usuario", usuarioAtual);
             return "timeline";
@@ -53,14 +70,15 @@ public class AppController {
     }
 
     @PostMapping("/cadastrar")
-    public String realizarCadastro(@RequestParam String nome, String identificador, String tipo){
+    public String realizarCadastro(@RequestParam String nome, String identificador, String tipo, Model model){
         if (tipo.equals("pessoafisica")){
             try {
                 PessoaFisica novoUsuario = new PessoaFisica(nome);
                 novoUsuario.setCpf(Long.parseLong(identificador));
                 application.criarPerfil(novoUsuario);
             } catch (PEException e){
-                //TODO: tratar Exceção
+                model.addAttribute("erro", e.getMessage());
+                return "error";
             }
         }
         else if (tipo.equals("pessoajuridica")){
@@ -69,7 +87,8 @@ public class AppController {
                 novoUsuario.setCnpj(Long.parseLong(identificador));
                 application.criarPerfil(novoUsuario);
             } catch (PEException e){
-                //TODO: tratar Exceção
+                model.addAttribute("erro", e.getMessage());
+                return "error";
             }
         }
         return "redirect:/";
@@ -94,25 +113,29 @@ public class AppController {
     }
 
     @GetMapping("/tweetar")
-    public String tweetar(){
+    public String tweetar(Model model){
         if (usuarioAtual == null){
-            return "redirect:/";
+            model.addAttribute("erro", "Não está logado");
+            return "error";
         }
+        model.addAttribute("usuario", usuarioAtual);
         return "tweetar";
     }
 
     @PostMapping("/tweetar")
-    public String tweetar(@RequestParam String mensagem){
+    public String tweetar(@RequestParam String mensagem, Model model){
         if (usuarioAtual == null){
-            //TODO: tratar o caso de usuário nulo
-            return "redirect:/";
+            model.addAttribute("erro", "Não está logado");
+            return "error";
         }
         try {
             application.tweetar(usuarioAtual.getUsuario(), mensagem);
         } catch (PIException e){
-            //TODO: tratar Exceção
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         } catch (MFPException e){
-            //TODO: tratar Exceção
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         }
 
         return "redirect:/";
@@ -120,29 +143,106 @@ public class AppController {
 
     @GetMapping("/perfil")
     public String paginaPerfil(@RequestParam String usuario, Model model){
-        //TODO: tratar o caso de usuário nulo
-        model.addAttribute("usuario", usuario);
-        model.addAttribute("estaseguindo", estaSeguindo(usuario));
+        Perfil tmpUsuario = repositorio.buscar(usuario);
+        if (tmpUsuario == null){
+            model.addAttribute("erro", "Usuário não encontrado");
+            return "error";
+        }
+        try {
+            boolean estaSeguindo = application.estaSeguindo(usuarioAtual.getUsuario(), usuario);
+            model.addAttribute("estaseguindo", estaSeguindo);
+        } catch (PIException e){
+            model.addAttribute("erro", e.getMessage());
+            return "error";
+        } catch (PDException e){
+            model.addAttribute("erro", e.getMessage());
+            return "error";
+        } catch (SIException e){
+            model.addAttribute("erro", e.getMessage());
+            return "error";
+        }
+        model.addAttribute("usuario", usuarioAtual);
+        model.addAttribute("usuarioperfil", usuario);
+        model.addAttribute("isAtual", (usuarioAtual.getUsuario().equals(usuario)));
+        model.addAttribute("isativo", tmpUsuario.isAtivo());
         try {
             List<Tweet> tmpTweets = application.tweets(usuario);
             model.addAttribute("tweets", tmpTweets);
         } catch (PIException e){
-            //TODO: tratar Exceção
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         } catch (PDException e){
-            //TODO: tratar Exceção
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         }
-        return "usuario";
+
+        try {
+            int numeroSeguidores = application.numeroSeguidores(usuario);
+            int numeroSeguidos = application.numeroSeguidos(usuario);
+            model.addAttribute("numeroseguidores", numeroSeguidores);
+            model.addAttribute("numeroseguidos", numeroSeguidos);
+        } catch (PIException e){
+            model.addAttribute("erro", e.getMessage());
+            return "error";
+        } catch (PDException e){
+            model.addAttribute("erro", e.getMessage());
+            return "error";
+        }
+        return "perfil";
+    }
+
+    @GetMapping("/editarperfil")
+    public String editarPerfil(Model model){
+        model.addAttribute("usuario", usuarioAtual);
+        model.addAttribute("isativo", usuarioAtual.isAtivo());
+        return "editarperfil";
+    }
+
+    @GetMapping("/desativarconta")
+    public String desativarConta(@RequestParam String usuario){
+        if (!usuario.equals(usuarioAtual.getUsuario())){
+            //TODO: tratar caso de usuários diferentes
+            return "redirect:/";
+        }
+        else if (usuario == null){
+            //TODO: tratar caso de usuário nulo
+            return "redirect:/";
+        }
+        Perfil tmp = repositorio.buscar(usuario);
+        //TODO: tratar caso nulo
+        tmp.setAtivo(false);
+        usuarioAtual.setAtivo(false);
+        return "redirect:/perfil?usuario=" + usuario;
+    }
+
+    @GetMapping("/ativarconta")
+    public String ativarConta(@RequestParam String usuario){
+        if (!usuario.equals(usuarioAtual.getUsuario())){
+            //TODO: tratar caso de usuários diferentes
+            return "redirect:/";
+        }
+        else if (usuario == null){
+            //TODO: tratar caso de usuário nulo
+            return "redirect:/";
+        }
+        Perfil tmp = repositorio.buscar(usuario);
+        //TODO: tratar caso nulo
+        tmp.setAtivo(true);
+        usuarioAtual.setAtivo(true);
+        return "redirect:/perfil?usuario=" + usuario;
     }
 
     @GetMapping("/buscarusuario")
     public String buscarUsuario(@RequestParam(required = false) String usuario, Model model){
         if (usuario == null){
-            return "buscarusuario";
+            model.addAttribute("erro", "Usuário não encontrado");
+            return "error";
         }
         else {
             Perfil tmpUsuario = repositorio.buscar(usuario);
-            if (usuario == null){
-                return "redirect:/";
+            if (tmpUsuario == null){
+                model.addAttribute("erro", "Usuário não encontrado");
+                return "error";
             }
             else {
                 return "redirect:/perfil?usuario=" + usuario;
@@ -151,35 +251,76 @@ public class AppController {
     }
 
     @PostMapping("/seguir")
-    public String seguir(@RequestParam String usuario){
+    public String seguir(@RequestParam String usuario, Model model){
         try{
             application.seguir(usuarioAtual.getUsuario(), usuario);
         } catch (PIException e){
-            //TODO: tratar Exceção
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         } catch (PDException e){
-            //TODO: tratar Exceção
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         } catch (SIException e){
-            //TODO: tratar Exceção
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         }
         return "redirect:/perfil?usuario=" + usuario;
     }
 
-    public boolean estaSeguindo(String seguido){
-        if (usuarioAtual == null){
-            return false;
-        }
-        try {
-            List<Perfil> seguindo =  application.seguidos(usuarioAtual.getUsuario());
-            for (Perfil s : seguindo){
-                if (s.getUsuario().equals(seguido)) return true;
-            }
-            return false;
+    @GetMapping("/seguidores")
+    public String seguidores(@RequestParam(required = false) String usuario, Model model){
+        try{
+            List<Perfil> tmpSeguidores =  application.seguidores(usuario);
+            int quantSeguidores =  application.numeroSeguidores(usuario);
+            model.addAttribute("seguidores", tmpSeguidores);
+            model.addAttribute("quantseguidores", quantSeguidores);
+            model.addAttribute("usuarioatual", usuario);
         } catch (PIException e){
-            //TODO: tratar Exceção
-            return false;
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         } catch (PDException e){
-            //TODO: tratar Exceção
-            return false;
+            model.addAttribute("erro", e.getMessage());
+            return "error";
         }
+        model.addAttribute("usuario", usuarioAtual);
+        return "seguidores";
     }
+
+    @GetMapping("/seguidos")
+    public String seguidos(@RequestParam(required = false) String usuario, Model model){
+        try {
+            List<Perfil> tmpSeguidos = application.seguidos(usuario);
+            int quantSeguidos = application.numeroSeguidos(usuario);
+            model.addAttribute("seguidos", tmpSeguidos);
+            model.addAttribute("quantseguidos", quantSeguidos);
+            model.addAttribute("usuarioatual", usuario);
+        } catch (PIException e){
+            model.addAttribute("erro", e.getMessage());
+            return "error";
+        } catch (PDException e) {
+            model.addAttribute("erro", e.getMessage());
+            return "error";
+        }
+        model.addAttribute("usuario", usuarioAtual);
+        return "seguidos";
+    }
+
+//    public boolean estaSeguindo(String seguido){
+//        if (usuarioAtual == null){
+//            return false;
+//        }
+//        try {
+//            List<Perfil> seguindo =  application.seguidos(usuarioAtual.getUsuario());
+//            for (Perfil s : seguindo){
+//                if (s.getUsuario().equals(seguido)) return true;
+//            }
+//            return false;
+//        } catch (PIException e){
+//            //TODO: tratar Exceção
+//            return false;
+//        } catch (PDException e){
+//            //TODO: tratar Exceção
+//            return false;
+//        }
+//    }
 }

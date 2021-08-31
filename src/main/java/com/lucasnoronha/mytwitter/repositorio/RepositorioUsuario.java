@@ -3,6 +3,8 @@ package com.lucasnoronha.mytwitter.repositorio;
 import com.lucasnoronha.mytwitter.excecao.UJCException;
 import com.lucasnoronha.mytwitter.excecao.UNCException;
 import com.lucasnoronha.mytwitter.usuario.Perfil;
+import com.lucasnoronha.mytwitter.usuario.PessoaFisica;
+import com.lucasnoronha.mytwitter.usuario.PessoaJuridica;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,8 +38,12 @@ public class RepositorioUsuario implements IRepositorioUsuario{
         if (tmp == null)
             throw new UNCException(usuario.getUsuario());
         else {
-            usuarios.remove(tmp);
-            usuarios.add(usuario);
+            if (tmp instanceof PessoaFisica){
+                ((PessoaFisica) tmp).setCpf(((PessoaFisica) usuario).getCpf());
+            }
+            else if (tmp instanceof PessoaJuridica){
+                ((PessoaJuridica) tmp).setCnpj(((PessoaJuridica) usuario).getCnpj());
+            }
         }
     }
 }

@@ -1,8 +1,5 @@
 package com.lucasnoronha.mytwitter.usuario;
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Component;
-
 import java.util.Vector;
 
 public abstract class Perfil {

@@ -45,12 +45,7 @@
         </div>
     </nav>
 
-<!--    <h1>Timeline</h1>-->
-<!--    <a href="/logout">sair</a>-->
-<!--    <a href="/tweetar">Escrever Nova Mensagem</a>-->
-<!--    <a th:href="@{/perfil(usuario=${usuario.usuario})}">Meu Perfil</a>-->
-<!--    <a href="/buscarusuario">Buscar Usuário</a>-->
-<!--    <p th:text="${usuario.usuario}"></p>-->
+
     <div th:if="${quanttweets} != 0" class="d-flex flex-column align-items-center">
         <div th:each="tweet : ${timeline}" class="card mt-4" style="width: 36rem;">
             <div class="card-body">
@@ -63,12 +58,7 @@
         <h3>Parece que não há nada rolando no momento</h3>
         <a href="/tweetar" class="btn btn-primary mt-3">Escreva seu primeiro tweet</a>
     </div>
-<!--    <div th:each="tweet : ${timeline}">-->
-<!--        <hr>-->
-<!--        <p th:text="${tweet.usuario}"></p>-->
-<!--        <p th:text="${tweet.mensagem}"></p>-->
-<!--        <hr>-->
-<!--    </div>-->
+
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"

@@ -47,9 +47,14 @@
 
   <div class="container w-25">
 
+    <div class="container text-center mt-5">
+      <h5 class="text-body" th:text="'CPF/CNPJ Atual: ' + ${id}"></h5>
+    </div>
+
     <div class="container mt-5">
-      <form action="editarperfil" method="post">
+      <form action="atualizarperfil" method="post">
         <label class="form-label">Novo CPF/CNPJ</label>
+        <input type="text" name="usuario" th:value="${usuario.usuario}" hidden>
         <input class="form-control" type="text" name="identificador">
         <div class="container p-0">
           <button type="submit" class="btn btn-primary mt-2">Atualizar</button>

@@ -6,7 +6,6 @@ import com.lucasnoronha.mytwitter.usuario.Perfil;
 import com.lucasnoronha.mytwitter.usuario.Tweet;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -109,6 +108,12 @@ public class MyTwitter implements ITwitter{
 
         tmpSeguido.addSeguidor(tmpSeguidor);
         tmpSeguidor.addSeguido(tmpSeguido);
+        List<Tweet> tmpTimeline =  tmpSeguido.getTimeline();
+        for (Tweet t : tmpTimeline){
+            if (t.getUsuario().equals(tmpSeguido.getUsuario())){
+                tmpSeguidor.addTweet(t);
+            }
+        }
     }
 
     @Override

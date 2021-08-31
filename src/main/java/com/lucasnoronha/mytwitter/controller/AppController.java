@@ -55,10 +55,7 @@ public class AppController {
             } catch (PIException e){
                 model.addAttribute("erro", e.getMessage());
                 return "error";
-            } catch (PDException e){
-                model.addAttribute("erro", e.getMessage());
-                return "error";
-            }
+            } catch (PDException e){}
             model.addAttribute("usuario", usuarioAtual);
             return "timeline";
         }
@@ -154,10 +151,8 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e){
-            model.addAttribute("erro", e.getMessage());
-            return "error";
-        } catch (SIException e){
+        } catch (PDException e){}
+          catch (SIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
         }
@@ -171,10 +166,7 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e){
-            model.addAttribute("erro", e.getMessage());
-            return "error";
-        }
+        } catch (PDException e){}
 
         try {
             int numeroSeguidores = application.numeroSeguidores(usuario);
@@ -184,10 +176,7 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e){
-            model.addAttribute("erro", e.getMessage());
-            return "error";
-        }
+        } catch (PDException e){}
         return "perfil";
     }
 
@@ -195,38 +184,59 @@ public class AppController {
     public String editarPerfil(Model model){
         model.addAttribute("usuario", usuarioAtual);
         model.addAttribute("isativo", usuarioAtual.isAtivo());
+        if (usuarioAtual instanceof PessoaFisica) model.addAttribute("id", ((PessoaFisica) usuarioAtual).getCpf());
+        else model.addAttribute("id", ((PessoaJuridica) usuarioAtual).getCnpj());
         return "editarperfil";
     }
 
-    @GetMapping("/desativarconta")
-    public String desativarConta(@RequestParam String usuario){
+    @PostMapping("/atualizarperfil")
+    public String atualizarPerfil(@RequestParam String identificador, String usuario, Model model){
         if (!usuario.equals(usuarioAtual.getUsuario())){
-            //TODO: tratar caso de usuários diferentes
-            return "redirect:/";
+            model.addAttribute("erro", "Acesso Negado");
+            return "error";
         }
-        else if (usuario == null){
-            //TODO: tratar caso de usuário nulo
-            return "redirect:/";
+        if (usuarioAtual instanceof PessoaFisica){
+            ((PessoaFisica) usuarioAtual).setCpf(Long.parseLong(identificador));
+        }
+        else {
+            ((PessoaJuridica) usuarioAtual).setCnpj(Long.parseLong(identificador));
+        }
+        try {
+            repositorio.atualizar(usuarioAtual);
+        } catch (UNCException e){
+            model.addAttribute("erro", e.getMessage());
+            return "error";
+        }
+        return "redirect:/perfil?usuario=" + usuario;
+    }
+
+    @GetMapping("/desativarconta")
+    public String desativarConta(@RequestParam String usuario, Model model){
+        if (!usuario.equals(usuarioAtual.getUsuario())){
+            model.addAttribute("erro", "Acesso Negado");
+            return "error";
         }
         Perfil tmp = repositorio.buscar(usuario);
-        //TODO: tratar caso nulo
+        if (tmp == null){
+            model.addAttribute("erro", "Perfil Inexistente");
+            return "error";
+        }
         tmp.setAtivo(false);
         usuarioAtual.setAtivo(false);
         return "redirect:/perfil?usuario=" + usuario;
     }
 
     @GetMapping("/ativarconta")
-    public String ativarConta(@RequestParam String usuario){
+    public String ativarConta(@RequestParam String usuario, Model model){
         if (!usuario.equals(usuarioAtual.getUsuario())){
-            //TODO: tratar caso de usuários diferentes
-            return "redirect:/";
-        }
-        else if (usuario == null){
-            //TODO: tratar caso de usuário nulo
-            return "redirect:/";
+            model.addAttribute("erro", "Acesso Negado");
+            return "error";
         }
         Perfil tmp = repositorio.buscar(usuario);
-        //TODO: tratar caso nulo
+        if (tmp == null){
+            model.addAttribute("erro", "Perfil Inexistente");
+            return "error";
+        }
         tmp.setAtivo(true);
         usuarioAtual.setAtivo(true);
         return "redirect:/perfil?usuario=" + usuario;
@@ -258,7 +268,7 @@ public class AppController {
             model.addAttribute("erro", e.getMessage());
             return "error";
         } catch (PDException e){
-            model.addAttribute("erro", e.getMessage());
+            model.addAttribute("erro","Impossível Seguir Perfil Desativado");
             return "error";
         } catch (SIException e){
             model.addAttribute("erro", e.getMessage());
@@ -278,10 +288,7 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e){
-            model.addAttribute("erro", e.getMessage());
-            return "error";
-        }
+        } catch (PDException e){}
         model.addAttribute("usuario", usuarioAtual);
         return "seguidores";
     }
@@ -297,30 +304,8 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e) {
-            model.addAttribute("erro", e.getMessage());
-            return "error";
-        }
+        } catch (PDException e) {}
         model.addAttribute("usuario", usuarioAtual);
         return "seguidos";
     }
-
-//    public boolean estaSeguindo(String seguido){
-//        if (usuarioAtual == null){
-//            return false;
-//        }
-//        try {
-//            List<Perfil> seguindo =  application.seguidos(usuarioAtual.getUsuario());
-//            for (Perfil s : seguindo){
-//                if (s.getUsuario().equals(seguido)) return true;
-//            }
-//            return false;
-//        } catch (PIException e){
-//            //TODO: tratar Exceção
-//            return false;
-//        } catch (PDException e){
-//            //TODO: tratar Exceção
-//            return false;
-//        }
-//    }
 }

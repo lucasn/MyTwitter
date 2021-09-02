@@ -25,21 +25,6 @@ public class AppController {
     public AppController(ITwitter application, IRepositorioUsuario repositorio){
         this.application = application;
         this.repositorio = repositorio;
-        //TODO: remover testes
-        PessoaFisica p1 = new PessoaFisica("lucas");
-        p1.setCpf(123L);
-        try {
-            this.application.criarPerfil(p1);
-        } catch (PEException e){
-
-        }
-        PessoaFisica p2 = new PessoaFisica("cleber");
-        p2.setCpf(123L);
-        try {
-            this.application.criarPerfil(p2);
-        } catch (PEException e){
-
-        }
     }
 
     @GetMapping("/")
@@ -55,7 +40,9 @@ public class AppController {
             } catch (PIException e){
                 model.addAttribute("erro", e.getMessage());
                 return "error";
-            } catch (PDException e){}
+            } catch (PDException e){
+                model.addAttribute("erro", e.getMessage());
+            }
             model.addAttribute("usuario", usuarioAtual);
             return "timeline";
         }
@@ -151,7 +138,9 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e){}
+        } catch (PDException e){
+            model.addAttribute("erro", e.getMessage());
+        }
           catch (SIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
@@ -166,7 +155,9 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e){}
+        } catch (PDException e){
+            model.addAttribute("erro", e.getMessage());
+        }
 
         try {
             int numeroSeguidores = application.numeroSeguidores(usuario);
@@ -176,7 +167,9 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e){}
+        } catch (PDException e){
+            model.addAttribute("erro", e.getMessage());
+        }
         return "perfil";
     }
 
@@ -268,7 +261,7 @@ public class AppController {
             model.addAttribute("erro", e.getMessage());
             return "error";
         } catch (PDException e){
-            model.addAttribute("erro","Impossível Seguir Perfil Desativado");
+            model.addAttribute("erro","Impossível Seguir: Perfil Desativado");
             return "error";
         } catch (SIException e){
             model.addAttribute("erro", e.getMessage());
@@ -288,7 +281,9 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e){}
+        } catch (PDException e){
+            model.addAttribute("erro", e.getMessage());
+        }
         model.addAttribute("usuario", usuarioAtual);
         return "seguidores";
     }
@@ -304,7 +299,9 @@ public class AppController {
         } catch (PIException e){
             model.addAttribute("erro", e.getMessage());
             return "error";
-        } catch (PDException e) {}
+        } catch (PDException e) {
+            model.addAttribute("erro", e.getMessage());
+        }
         model.addAttribute("usuario", usuarioAtual);
         return "seguidos";
     }
